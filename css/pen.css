@@ -504,3 +504,26 @@
 .pig-element { animation: pig-idle 2s infinite ease-in-out, pig-move 4s infinite alternate ease-in-out; }
 /* 睡着的时候不乱跑，只慢慢呼吸 */
 .pig-element.sleeping { animation: pig-idle 6s infinite ease-in-out; }
+
+/* ---------- 小猪窝：用图稿代替 CSS 画的猪 ---------- */
+.pig {
+  width: 210px;
+  height: 124px;
+  transform: scale(var(--grow, 1));
+  transform-origin: 50% 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.pig .pig-body {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 14px rgba(196, 108, 138, .28));
+}
+.pig.sleeping .pig-body { filter: drop-shadow(0 8px 12px rgba(160, 120, 160, .22)) saturate(.9) brightness(.96); }
+.pig-float, .pig-head, .pig-ear, .pig-eye, .pig-cheek, .pig-snout, .pig-mouth { display: none !important; }
+.pig-shadow {
+  width: 150px;
+  height: 26px;
+  margin-left: -75px;
+}

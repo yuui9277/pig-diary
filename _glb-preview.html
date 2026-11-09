@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#FBE4EC;overflow:hidden}</style>
+<script src="/js/vendor/three.min.js"></script><script src="/js/vendor/GLTFLoader.js"></script></head>
+<body><script>
+const W=768,H=768;
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setSize(W,H);renderer.setPixelRatio(1);document.body.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(35,W/H,0.01,100);
+scene.add(new THREE.HemisphereLight(0xffffff,0xffd9e3,1.1));
+const d1=new THREE.DirectionalLight(0xffffff,1.6);d1.position.set(3,5,4);scene.add(d1);
+const d2=new THREE.DirectionalLight(0xffc0d0,.7);d2.position.set(-4,2,-3);scene.add(d2);
+window.__done=false;
+new THREE.GLTFLoader().load('/models/pig-ai.glb',function(g){
+  const root=g.scene;
+  let tris=0;
+  root.traverse(o=>{ if(o.isMesh){ const idx=o.geometry.index; tris+=(idx?idx.count:o.geometry.attributes.position.count)/3; }});
+  const box=new THREE.Box3().setFromObject(root);
+  const size=box.getSize(new THREE.Vector3()); const ctr=box.getCenter(new THREE.Vector3());
+  const maxd=Math.max(size.x,size.y,size.z);
+  root.position.sub(ctr);
+  const mat=new THREE.MeshStandardMaterial({color:0xF7A8BF,roughness:.62,metalness:0});
+  root.traverse(o=>{ if(o.isMesh){ o.material=mat; o.geometry.computeVertexNormals&&o.geometry.computeVertexNormals(); }});
+  scene.add(root);
+  cam.position.set(0,0,maxd*2.1); cam.lookAt(0,0,0);
+  renderer.render(scene,cam);
+  window.__stats={tris:Math.round(tris),size:[+size.x.toFixed(3),+size.y.toFixed(3),+size.z.toFixed(3)]};
+  window.__done=true;
+},undefined,function(e){ window.__stats={error:String(e).slice(0,200)}; window.__done=true; });
+</script></body></html>

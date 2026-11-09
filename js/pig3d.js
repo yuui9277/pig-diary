@@ -1267,6 +1267,7 @@
   }
 
   function arm() {
+    if (window.PIG_NO_3D) return;      // 用图稿代替 3D 小猪时，一颗字节都不下载
     if (armed || arming) return;
     if (!penVisible()) return;
     arming = true;

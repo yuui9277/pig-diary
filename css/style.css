@@ -613,3 +613,49 @@ a { color: var(--press); }
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- 统一的小猪图稿（用同一张图，不再用 emoji） ---------- */
+.pig-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
+}
+.pig-ic {
+  display: inline-block;
+  width: 1.55em;
+  height: 1.55em;
+  object-fit: contain;
+  vertical-align: -.42em;
+  margin-right: .12em;
+  pointer-events: none;
+  user-select: none;
+}
+.app-header .pig-logo {
+  font-size: 0;
+  width: 34px;
+  height: auto;
+  line-height: 1;
+}
+.hero .big-pig {
+  font-size: 0;
+  width: 190px;
+  max-width: 62%;
+  height: auto;
+  margin: 2px auto 6px;
+}
+.us-heart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 26px;
+}
+.us-heart img { width: 54px; height: auto; }
+.us-heart .pig-ic { width: 54px; height: 32px; vertical-align: middle; }
+#toTop .pig-ic { width: 22px; height: 22px; margin: 0; vertical-align: middle; }
+.bottom-nav .ic .pig-ic { width: 20px; height: 20px; margin: 0; vertical-align: middle; }
+.bottom-nav button[data-page="items"] .ic { display: inline-flex; align-items: center; justify-content: center; }
