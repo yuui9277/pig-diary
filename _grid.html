@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>小猪候选</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #FBE4EC;
+    font: 14px/1.4 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    color: #5C4033;
+  }
+  #stage { display: grid; grid-template-columns: repeat(4, 250px); gap: 0; padding: 0; }
+  .cell { width: 250px; height: 250px; position: relative; background: linear-gradient(160deg, #FFF3F8, #F6DCE6); border-radius: 14px; overflow: hidden; }
+  .cell canvas { width: 250px; height: 250px; display: block; }
+  .tag {
+    position: absolute; left: 8px; top: 6px; font-weight: 700; font-size: 15px;
+    color: #C2447A; background: rgba(255,255,255,.8); border-radius: 8px; padding: 0 7px;
+  }
+  .nm { position: absolute; left: 8px; bottom: 5px; right: 8px; font-size: 10px; color: #8A6E7E;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+  var MODELS = [
+    ['A', '_models/A.glb', 'Quaternius 猪（会走会跳）'],
+    ['B', '_models/B.glb', 'jeremy 猪'],
+    ['C', '_models/C.glb', 'Google Poly 猪'],
+    ['D', '_models/D.glb', 'Poly 粉猪'],
+    ['E', '_models/E.glb', 'Quaternius 猪 2'],
+    ['F', '_models/F.glb', 'Poly 猪 2'],
+    ['G', '_models/G.glb', 'Giga Pig'],
+    ['H', '_models/H.glb', 'CreativeTrio 猪']
+  ].filter(function (m) { return window['SKIP_' + m[0]] !== true; });
+
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1);
+  renderer.setSize(250 * 4, 250 * 2);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  renderer.setScissorTest(true);
+  renderer.autoClear = false;
+  document.getElementById('stage').appendChild(renderer.domElement);
+  renderer.domElement.style.position = 'absolute';
+  renderer.domElement.style.left = '0px';
+  renderer.domElement.style.top = '0px';
+  renderer.domElement.style.pointerEvents = 'none';
+
+  var scene = new THREE.Scene();
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xE7C7D4, 1.15));
+  var key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(3, 6, 5); scene.add(key);
+  var fill = new THREE.DirectionalLight(0xffe6f0, 0.5); fill.position.set(-4, 2, 3); scene.add(fill);
+
+  var loader = new THREE.GLTFLoader();
+  var camera = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+  window.__grid = { ready: 0, total: MODELS.length, cells: [] };
+
+  MODELS.forEach(function (item, i) {
+    var tag = item[0], url = item[1];
+    var cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.innerHTML = '<span class="tag">' + tag + '</span><span class="nm">' + item[2] + '</span>';
+    document.getElementById('stage').appendChild(cell);
+
+    loader.load(url, function (g) {
+      var root = g.scene;
+      var box = new THREE.Box3().setFromObject(root);
+      var size = new THREE.Vector3(), center = new THREE.Vector3();
+      box.getSize(size); box.getCenter(center);
+      var maxSide = Math.max(size.x, size.y, size.z);
+      var dist = maxSide / (2 * Math.tan(Math.PI * 30 / 360)) * 1.25;
+      root.position.sub(center);                       // 居中到原点
+      scene.add(root);
+
+      // 从正前方（+Z 略高）看
+      camera.position.set(dist * 0.28, dist * 0.22, dist);
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
+
+      var col = i % 4, row = Math.floor(i / 4);
+      var y = (1 - row) * 250;                          // WebGL 原点在左下，row0 在上
+      renderer.setViewport(col * 250, y, 250, 250);
+      renderer.setScissor(col * 250, y, 250, 250);
+      renderer.setClearColor(0x000000, 0);
+      renderer.clear();
+      renderer.render(scene, camera);
+
+      window.__grid.ready++;
+      window.__grid.cells.push({ tag: tag, size: size.toArray().map(function (v) { return +v.toFixed(2); }) });
+      scene.remove(root);
+    }, undefined, function (e) {
+      window.__grid.ready++;
+      window.__grid.cells.push({ tag: tag, error: String(e && e.message || e) });
+    });
+  });
+</script>
+</body>
+</html>

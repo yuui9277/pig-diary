@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>model</title>
+<style>
+  html,body{margin:0;width:300px;height:300px;overflow:hidden;background:#FBE4EC}
+  canvas{display:block}
+</style>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  var q = new URLSearchParams(location.search);
+  var url = q.get('m') || '_models/A.glb';
+  window.__ready = false;
+
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1);
+  renderer.setSize(300, 300);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.setClearColor(0xFBE4EC, 1);
+  document.body.appendChild(renderer.domElement);
+
+  var scene = new THREE.Scene();
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xE7C7D4, 1.1));
+  var key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(3, 6, 5); scene.add(key);
+  var fill = new THREE.DirectionalLight(0xffe6f0, 0.55); fill.position.set(-4, 2, 3); scene.add(fill);
+  var camera = new THREE.PerspectiveCamera(30, 1, 0.01, 200);
+
+  new THREE.GLTFLoader().load(url, function (g) {
+    var root = g.scene;
+    var box = new THREE.Box3().setFromObject(root);
+    var size = new THREE.Vector3(), center = new THREE.Vector3();
+    box.getSize(size); box.getCenter(center);
+    root.position.sub(center);
+    scene.add(root);
+    var maxSide = Math.max(size.x, size.y, size.z);
+    var dist = maxSide * 2.1;
+    camera.position.set(dist * 0.32, dist * 0.24, dist * 0.95);
+    camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    window.__size = size.toArray().map(function (v) { return +v.toFixed(2); });
+    window.__ready = true;
+  }, undefined, function (e) {
+    window.__err = String(e && e.message || e);
+    window.__ready = true;
+  });
+</script>
+</body>
+</html>

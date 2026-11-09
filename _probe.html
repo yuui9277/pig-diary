@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>GLB probe</title>
+<style>html,body{margin:0;background:#222;overflow:hidden}canvas{display:block}</style>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  window.__probe = { started: true };
+  var renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(400, 300);
+  document.body.appendChild(renderer.domElement);
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x333333);
+  var camera = new THREE.PerspectiveCamera(35, 400 / 300, 0.1, 100);
+  camera.position.set(2.2, 1.8, 3.0);
+  camera.lookAt(0, 0.8, 0);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.4));
+  var d = new THREE.DirectionalLight(0xffffff, 1.2);
+  d.position.set(3, 5, 4);
+  scene.add(d);
+
+  var loader = new THREE.GLTFLoader();
+  loader.load('js/vendor/pig.glb', function (g) {
+    var root = g.scene;
+    scene.add(root);
+    var box = new THREE.Box3().setFromObject(root);
+    var size = new THREE.Vector3(), center = new THREE.Vector3();
+    box.getSize(size); box.getCenter(center);
+    var mats = [], meshes = 0, skinned = 0;
+    root.traverse(function (o) {
+      if (o.isMesh || o.isSkinnedMesh) {
+        meshes++;
+        if (o.isSkinnedMesh) skinned++;
+        var m = o.material;
+        if (m && mats.indexOf(m.name) < 0) mats.push(m.name + ':' + m.type + (m.map ? '+map' : ''));
+      }
+    });
+    window.__probe = {
+      ok: true,
+      size: [+size.x.toFixed(3), +size.y.toFixed(3), +size.z.toFixed(3)],
+      center: [+center.x.toFixed(3), +center.y.toFixed(3), +center.z.toFixed(3)],
+      min: [+box.min.x.toFixed(3), +box.min.y.toFixed(3), +box.min.z.toFixed(3)],
+      max: [+box.max.x.toFixed(3), +box.max.y.toFixed(3), +box.max.z.toFixed(3)],
+      animations: g.animations.map(function (a) { return a.name + ' ' + a.duration.toFixed(2) + 's'; }),
+      meshes: meshes, skinned: skinned, materials: mats,
+      rootScale: root.scale.toArray().map(function (v) { return +v.toFixed(3); }),
+      rootChildren: root.children.map(function (c) { return c.name + '(' + c.type + ')'; })
+    };
+    var bones = [];
+    root.traverse(function (o) {
+      if (o.isBone && /head|snout|ear|tail|torso|back|hips|neck/i.test(o.name)) {
+        var p = new THREE.Vector3();
+        o.getWorldPosition(p);
+        bones.push(o.name + ' @ ' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ',' + p.z.toFixed(2));
+      }
+    });
+    window.__probe.bones = bones;    renderer.render(scene, camera);
+  }, undefined, function (err) {
+    window.__probe = { ok: false, error: String(err && err.message || err) };
+  });
+</script>
+</body>
+</html>

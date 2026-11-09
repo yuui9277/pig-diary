@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>2D 小猪风格</title>
+<style>
+  html,body{margin:0;background:#FAECF3}
+  #wrap{display:grid;grid-template-columns:repeat(3,300px);gap:12px;padding:12px}
+  .c{width:300px;height:300px;border-radius:16px;background:linear-gradient(160deg,#FFF6FA,#F7DEE9);
+     display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 4px 14px rgba(196,120,150,.12)}
+  .c img{width:230px;height:230px;image-rendering:auto}
+  .t{position:absolute;left:0;bottom:-22px;font:13px/1.2 "Microsoft YaHei",sans-serif;color:#5C4033}
+  .k{position:absolute;left:8px;top:6px;font:700 16px/1.2 "Microsoft YaHei",sans-serif;color:#C2447A;
+     background:rgba(255,255,255,.85);border-radius:8px;padding:1px 8px}
+</style>
+</head>
+<body>
+<div id="wrap"></div>
+<script>
+  var items = [
+    ['ic-tw.svg', 'Twemoji 猪头', '1'],
+    ['ic-noto.svg', 'Noto 猪头', '2'],
+    ['ic-fluent-flat.svg', 'Fluent 扁平猪', '3'],
+    ['om-pig.svg', 'OpenMoji 猪', '4'],
+    ['om-pig2.svg', 'OpenMoji 猪 2', '5'],
+    ['ic-tw.svg', 'Twemoji 猪头（同 1，放大对比）', '6']
+  ];
+  var wrap = document.getElementById('wrap');
+  items.forEach(function (it) {
+    var d = document.createElement('div');
+    d.className = 'c';
+    d.innerHTML = '<span class="k">' + it[2] + '</span><img src="_emoji/' + it[0] + '" alt=""><span class="t">' + it[1] + '</span>';
+    wrap.appendChild(d);
+  });
+  window.addEventListener('load', function () { setTimeout(function () { window.__ready = true; }, 400); });
+</script>
+</body>
+</html>
