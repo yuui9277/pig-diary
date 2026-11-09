@@ -198,7 +198,7 @@
       earInner: clay(0xFB8CA9, { roughness: 0.48 }),
       nose: clay(0xFFA6BF, { roughness: 0.34 }),
       noseHole: clay(0xC2526C, { roughness: 0.55 }),
-      eye: new THREE.MeshBasicMaterial({ color: new THREE.Color(0x261A22).convertSRGBToLinear() }),
+      eye: new THREE.MeshBasicMaterial({ color: new THREE.Color(0x2E2128).convertSRGBToLinear() }),
       glint: new THREE.MeshBasicMaterial({ color: 0xFFFFFF }),
       blush: clay(0xFF7E9B, { roughness: 1, emissive: 0x000000, emissiveIntensity: 0 }),
       mouth: clay(0xA63B55, { roughness: 0.5 }),
@@ -291,14 +291,14 @@
     var skull = new THREE.Mesh(new THREE.SphereGeometry(0.93, 48, 32), M.skin);
     skull.scale.set(1.0, 0.97, 0.96);
     head.add(skull);
-    addOutline(skull, 0xE2678C, 1.028);
+    addOutline(skull, 0xE2678C, 1.017);
 
     // 鼻子
     var snout = new THREE.Mesh(new THREE.SphereGeometry(0.205, 34, 24), M.nose);
     snout.scale.set(1.26, 0.9, 0.72);
     snout.position.set(0, -0.145, 0.885);
     head.add(snout);
-    addOutline(snout, 0xE2678C, 1.05);
+    addOutline(snout, 0xE2678C, 1.035);
 
     [-1, 1].forEach(function (s) {
       var n = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 10), M.noseHole);
@@ -311,28 +311,22 @@
     var eyes = [];
     [-1, 1].forEach(function (s) {
       var eyeGroup = new THREE.Group();
-      eyeGroup.position.set(s * 0.325, 0.13, 0.85);
+      eyeGroup.position.set(s * 0.315, 0.15, 0.845);
       head.add(eyeGroup);
 
-      var e = new THREE.Mesh(new THREE.SphereGeometry(0.178, 32, 24), M.eye);
-      e.scale.set(1, 1.12, 0.8);
+      var e = new THREE.Mesh(new THREE.SphereGeometry(0.093, 26, 20), M.eye);
+      e.scale.set(1, 1.16, 0.9);
       eyeGroup.add(e);
 
-      // 虹膜：让黑豆眼有一点点层次，不是纯黑圆点
-      var iris = new THREE.Mesh(new THREE.SphereGeometry(0.112, 22, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x4A3438).convertSRGBToLinear() }));
-      iris.scale.set(1, 1.08, 0.5);
-      iris.position.z = 0.078;
-      iris.userData.noShadow = true;
-      eyeGroup.add(iris);
 
-      var glint = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 14), M.glint);
-      glint.position.set(-0.045, 0.052, 0.122);
+      var glint = new THREE.Mesh(new THREE.SphereGeometry(0.026, 14, 12), M.glint);
+      glint.position.set(-0.028, 0.034, 0.082);
       glint.scale.set(1, 1, 0.55);
       glint.userData.noShadow = true;
       eyeGroup.add(glint);
 
-      var glint2 = new THREE.Mesh(new THREE.SphereGeometry(0.026, 12, 10), M.glint);
-      glint2.position.set(0.048, -0.058, 0.118);
+      var glint2 = new THREE.Mesh(new THREE.SphereGeometry(0.012, 10, 8), M.glint);
+      glint2.position.set(0.03, -0.032, 0.08);
       glint2.userData.noShadow = true;
       eyeGroup.add(glint2);
 
@@ -393,7 +387,7 @@
       ear.position.set(s * 0.15, -0.1, 0);
       ear.rotation.z = s * 0.3;
       pivot.add(ear);
-      addOutline(ear, 0xE2678C, 1.045);
+      addOutline(ear, 0xE2678C, 1.03);
 
       var inner = new THREE.Mesh(new THREE.SphereGeometry(0.21, 22, 16), M.earInner);
       inner.scale.set(0.82, 1.08, 0.34);
