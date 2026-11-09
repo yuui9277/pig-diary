@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var VERSION = 'pig-diary-v3.6.0';
+var VERSION = 'pig-diary-v3.7.0';
 var SHELL = [
   './',
   './index.html',
@@ -24,7 +24,8 @@ var SHELL = [
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './img/pig.png',
-  './img/pig-sm.png'
+  './img/pig-sm.png',
+  './img/pig-ic.png'
 ];
 
 self.addEventListener('install', function (event) {

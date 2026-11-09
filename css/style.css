@@ -655,7 +655,7 @@ a { color: var(--press); }
   font-size: 26px;
 }
 .us-heart img { width: 54px; height: auto; }
-.us-heart .pig-ic { width: 54px; height: 32px; vertical-align: middle; }
+.pig-heart { width: 54px; height: 32px; object-fit: contain; vertical-align: middle; }
 #toTop .pig-ic { width: 22px; height: 22px; margin: 0; vertical-align: middle; }
 .bottom-nav .ic .pig-ic { width: 20px; height: 20px; margin: 0; vertical-align: middle; }
 .bottom-nav button[data-page="items"] .ic { display: inline-flex; align-items: center; justify-content: center; }
