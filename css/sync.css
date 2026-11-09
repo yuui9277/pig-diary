@@ -1,0 +1,17 @@
+/* 两台手机同步用的小样式 */
+.sync-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.02rem;
+  letter-spacing: .1em;
+  text-align: center;
+  padding: 14px 10px;
+  margin: 6px 0 10px;
+  border-radius: 14px;
+  background: #FFF1F5;
+  color: #7A284E;
+  word-break: break-all;
+  -webkit-user-select: all;
+  user-select: all;
+}
+#sync-status:empty { display: none; }
+#sync-status { margin-top: 8px; }

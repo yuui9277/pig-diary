@@ -1,0 +1,14 @@
+# 忽略系统 / 编辑器垃圾文件
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+*~
+
+# 本地预览时产生的临时文件
+*.log
+*.tmp
+
+# 不把打包产物的大文件重复提交（APK 放在 dl/ 里对外提供下载，这里保留）
+# dl/*.apk

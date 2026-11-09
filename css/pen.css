@@ -1,0 +1,486 @@
+﻿/* ===== 小猪窝：3D 卡通养成 =====
+ * 全部用 CSS 渐变 + 阴影做出体积感，没有一张图片。
+ * 分层：pen-scene（透视）→ pig（体型缩放）→ pig-float（呼吸/漂浮）→ 各部件
+ */
+
+.pen-card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FCFCFE 100%);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 28px rgba(150, 152, 190, .14), inset 0 1px 0 #fff;
+  padding: 8px 12px 10px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+/* 场景：给整个窝一点空间透视 */
+.pen-scene {
+  position: relative;
+  height: 224px;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  perspective: 900px;
+  perspective-origin: 50% 78%;
+  background: linear-gradient(135deg, #D4C4FB 0%, #FBE4EC 100%);
+  box-shadow: inset 0 1px 12px rgba(130, 132, 180, .10);
+  transition: background .6s ease, filter .6s ease;
+}
+
+/* 睡觉时：天色暗下来，透出一点月光 */
+.pen-scene.sleeping {
+  background: linear-gradient(135deg, #BEA9EE 0%, #EFCBDD 100%);
+  filter: saturate(.85);
+}
+.pen-scene.sleeping .pen-glow { opacity: 0; }
+/* 3D 打开后不需要这层 CSS 柔光，不然会把房间颜色冲淡 */
+.pen-scene.is3d .pen-glow { opacity: 0; }
+
+/* 背景柔光 */
+.pen-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  width: 260px;
+  height: 190px;
+  margin-left: -130px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, .75), rgba(255, 255, 255, 0) 72%);
+  opacity: .85;
+  transition: opacity .6s ease;
+  pointer-events: none;
+}
+
+/* ---------- 小猪 ---------- */
+.pig {
+  position: relative;
+  z-index: 2;
+  width: 168px;
+  height: 168px;
+  margin-bottom: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  transform-style: preserve-3d;
+  /* 身体随成长值变大；轻微前倾做出立体感 */
+  transform: rotateX(7deg) scale(var(--grow, 1));
+  transform-origin: 50% 92%;
+  transition: transform .6s cubic-bezier(.2, .8, .2, 1);
+}
+.pig:active { transform: rotateX(9deg) scale(calc(var(--grow, 1) * .94)); }
+.pig:focus-visible { outline: 3px dashed var(--pink-hot); outline-offset: 8px; border-radius: 50%; }
+
+/* 会呼吸、会上下飘的一层 */
+.pig-float {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+  animation: floaty 4.2s ease-in-out infinite;
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-6px) scale(1.015); }
+}
+
+/* 头：径向渐变营造球体，底部内阴影做出下巴的厚度 */
+.pig-head {
+  position: absolute;
+  left: 5px;
+  top: 30px;
+  width: 158px;
+  height: 132px;
+  border-radius: 50% 50% 46% 46% / 52% 52% 48% 48%;
+  background:
+    radial-gradient(60% 52% at 34% 24%, #FFE3EA 0%, #FFC9D6 42%, #FFB4C6 72%, #F79BAF 100%);
+  box-shadow:
+    inset 0 -18px 26px rgba(214, 96, 126, .30),
+    inset 0 10px 18px rgba(255, 255, 255, .55),
+    0 16px 26px rgba(226, 120, 150, .28),
+    0 2px 0 #F08FA6;
+  transform: translateZ(14px);
+}
+/* 高光：头顶那一片反光，是"亮面在左上"的关键 */
+.pig-head::after {
+  content: '';
+  position: absolute;
+  left: 16%;
+  top: 7%;
+  width: 46%;
+  height: 28%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, .75), rgba(255, 255, 255, 0) 72%);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+/* 耳朵：带厚度和内侧阴影 */
+.pig-ear {
+  position: absolute;
+  top: 8px;
+  width: 52px;
+  height: 52px;
+  background:
+    radial-gradient(60% 60% at 45% 35%, #FFD2DC 0%, #FFB0C2 55%, #EE8AA2 100%);
+  border-radius: 62% 62% 16% 16% / 72% 72% 24% 24%;
+  box-shadow:
+    inset 0 -8px 12px rgba(214, 96, 126, .35),
+    inset 0 6px 10px rgba(255, 255, 255, .5),
+    0 5px 10px rgba(226, 120, 150, .25);
+  transform-origin: 50% 92%;
+}
+.pig-ear.left {
+  left: 8px;
+  transform: rotate(-20deg) translateZ(6px);
+  animation: earIdleL 7s ease-in-out infinite;
+}
+.pig-ear.right {
+  right: 8px;
+  transform: rotate(20deg) scaleX(-1) translateZ(6px);
+  animation: earIdleR 7s ease-in-out infinite;
+}
+@keyframes earIdleL {
+  0%, 86%, 100% { transform: rotate(-20deg) translateZ(6px); }
+  90%           { transform: rotate(-29deg) translateZ(6px); }
+  94%           { transform: rotate(-15deg) translateZ(6px); }
+}
+@keyframes earIdleR {
+  0%, 86%, 100% { transform: rotate(20deg) scaleX(-1) translateZ(6px); }
+  90%           { transform: rotate(29deg) scaleX(-1) translateZ(6px); }
+  94%           { transform: rotate(15deg) scaleX(-1) translateZ(6px); }
+}
+
+/* 眼睛：玻璃球，带两个高光点，偶尔眨一下 */
+.pig-eye {
+  position: absolute;
+  top: 56px;
+  width: 22px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(60% 60% at 35% 30%, #6B4A44 0%, #432B27 55%, #2A1A17 100%);
+  box-shadow:
+    inset 0 -3px 5px rgba(0, 0, 0, .45),
+    0 2px 4px rgba(120, 60, 70, .28);
+  transform-origin: 50% 62%;
+  animation: blink 5.6s ease-in-out infinite;
+  transition: height .18s ease, width .18s ease, top .18s ease;
+}
+.pig-eye.left { left: 40px; animation-delay: .1s; }
+.pig-eye.right { right: 40px; }
+/* 主高光 */
+.pig-eye i {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: .95;
+  box-shadow: 0 0 4px rgba(255, 255, 255, .8);
+}
+/* 副高光 */
+.pig-eye i::after {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 11px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .8);
+}
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95%, 97%      { transform: scaleY(.08); }
+}
+
+/* 腮红 */
+.pig-cheek {
+  position: absolute;
+  top: 88px;
+  width: 30px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 106, 138, .55), rgba(255, 106, 138, 0) 78%);
+}
+.pig-cheek.left { left: 16px; }
+.pig-cheek.right { right: 16px; }
+
+/* 鼻子：凸出来的一块，带侧面和底部阴影 */
+.pig-snout {
+  position: absolute;
+  left: 50%;
+  top: 78px;
+  width: 76px;
+  height: 50px;
+  margin-left: -38px;
+  border-radius: 50% / 46%;
+  background:
+    radial-gradient(55% 55% at 38% 28%, #FFC6D3 0%, #FF9DB4 55%, #F5819B 100%);
+  box-shadow:
+    inset 0 -6px 10px rgba(198, 74, 106, .38),
+    inset 0 5px 8px rgba(255, 255, 255, .5),
+    0 8px 14px rgba(214, 96, 126, .32),
+    0 1px 0 #E8778F;
+  transform: translateZ(26px);
+}
+/* 鼻孔：小凹坑 */
+.pig-snout i {
+  position: absolute;
+  top: 17px;
+  width: 12px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(60% 60% at 40% 30%, #B9556E 0%, #8E3A52 75%, #7A2F45 100%);
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, .35), 0 1px 0 rgba(255, 255, 255, .35);
+}
+.pig-snout i:first-child { left: 18px; }
+.pig-snout i:last-child { right: 18px; }
+
+/* 嘴：一条带立体感的弧 */
+.pig-mouth {
+  position: absolute;
+  left: 50%;
+  top: 126px;
+  width: 34px;
+  height: 11px;
+  margin-left: -17px;
+  border-radius: 3px 3px 20px 20px;
+  background: linear-gradient(180deg, #C9556B 0%, #A83C55 100%);
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, .3), 0 1px 0 rgba(255, 255, 255, .3);
+  transition: height .16s ease, width .16s ease, border-radius .16s ease, margin .16s ease;
+  transform: translateZ(20px);
+}
+
+/* 王冠 */
+.pig-crown {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  margin-left: -20px;
+  font-size: 38px;
+  line-height: 1;
+  filter: drop-shadow(0 6px 8px rgba(150, 100, 10, .35));
+  transform: rotate(-8deg) translateZ(40px);
+  animation: crownFloat 2.6s ease-in-out infinite;
+}
+@keyframes crownFloat {
+  0%, 100% { transform: rotate(-8deg) translateY(0) translateZ(40px); }
+  50%      { transform: rotate(-3deg) translateY(-5px) translateZ(40px); }
+}
+
+/* 地面投影：跟着呼吸缩放，3D 的关键之一 */
+.pig-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 150px;
+  height: 26px;
+  margin-left: -75px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(214, 120, 148, .42), rgba(214, 120, 148, 0) 76%);
+  filter: blur(2px);
+  transform: scale(var(--grow, 1));
+  transition: transform .6s cubic-bezier(.2, .8, .2, 1), opacity .5s ease;
+  animation: shadowPulse 4.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shadowPulse {
+  0%, 100% { opacity: .9; transform: scale(var(--grow, 1)); }
+  50%      { opacity: .68; transform: scale(calc(var(--grow, 1) * .93)); }
+}
+
+/* ---------- 动作 ---------- */
+@keyframes chew {
+  0%, 100% { height: 11px; width: 34px; border-radius: 3px 3px 20px 20px; }
+  50%      { height: 22px; width: 40px; border-radius: 5px 5px 24px 24px; }
+}
+.pig.feeding .pig-mouth { animation: chew .3s ease-in-out 3; }
+.pig.feeding .pig-head { animation: headNod .9s ease-in-out; }
+@keyframes headNod {
+  0%, 100% { transform: translateZ(14px) rotate(0); }
+  35%      { transform: translateZ(14px) rotate(3deg) translateY(3px); }
+  70%      { transform: translateZ(14px) rotate(-2deg); }
+}
+
+@keyframes earLeftHit {
+  0%, 100% { transform: rotate(-20deg) translateZ(6px); }
+  35%      { transform: rotate(-46deg) translateZ(6px); }
+  70%      { transform: rotate(-8deg) translateZ(6px); }
+}
+@keyframes earRightHit {
+  0%, 100% { transform: rotate(20deg) scaleX(-1) translateZ(6px); }
+  35%      { transform: rotate(46deg) scaleX(-1) translateZ(6px); }
+  70%      { transform: rotate(8deg) scaleX(-1) translateZ(6px); }
+}
+.pig.patting .pig-ear.left { animation: earLeftHit .55s ease-in-out 2; }
+.pig.patting .pig-ear.right { animation: earRightHit .55s ease-in-out 2; }
+.pig.patting .pig-head { animation: headNod .55s ease-in-out 2; }
+
+/* 睡觉：闭眼（弯弯的线）、鼻子轻轻起伏 */
+.pig.sleeping .pig-float { animation: floaty 6s ease-in-out infinite; }
+.pig.sleeping .pig-eye {
+  height: 5px;
+  width: 24px;
+  top: 66px;
+  border-radius: 50% 50% 40% 40% / 100% 100% 30% 30%;
+  background: #5A3A34;
+  box-shadow: none;
+  animation: none;
+}
+.pig.sleeping .pig-eye i { display: none; }
+.pig.sleeping .pig-mouth {
+  height: 13px;
+  width: 15px;
+  margin-left: -7px;
+  border-radius: 50%;
+}
+.pig.sleeping .pig-snout { animation: snoutBreath 3.2s ease-in-out infinite; }
+@keyframes snoutBreath {
+  0%, 100% { transform: translateZ(26px) scale(1); }
+  50%      { transform: translateZ(26px) scale(1.05); }
+}
+
+/* 打呼噜的 z */
+.pig-zzz {
+  position: absolute;
+  right: 46px;
+  bottom: 122px;
+  font: 700 22px/1 Georgia, serif;
+  color: #8A6E9B;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, .8);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.pig-zzz.show { animation: snore 2.6s ease-out infinite; }
+@keyframes snore {
+  0%   { opacity: 0; transform: translate(0, 0) scale(.55) rotate(-8deg); }
+  30%  { opacity: .95; }
+  100% { opacity: 0; transform: translate(30px, -54px) scale(1.3) rotate(10deg); }
+}
+
+/* ---------- 飘出来的东西 ---------- */
+.pen-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 4;
+}
+
+.pen-pop {
+  position: absolute;
+  bottom: 118px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--press);
+  background: rgba(255, 255, 255, .92);
+  border-radius: 999px;
+  padding: 4px 12px;
+  white-space: nowrap;
+  box-shadow: 0 6px 14px rgba(214, 120, 148, .25);
+  animation: popUp 1.2s cubic-bezier(.2, .8, .3, 1) forwards;
+}
+.pen-pop.emoji {
+  background: transparent;
+  box-shadow: none;
+  font-size: 30px;
+  padding: 0;
+}
+.pen-pop.float { animation: heartFloat 1.6s ease-out forwards; }
+@keyframes popUp {
+  0%   { opacity: 0; transform: translateY(8px) scale(.8); }
+  25%  { opacity: 1; transform: translateY(-12px) scale(1.05); }
+  100% { opacity: 0; transform: translateY(-62px) scale(1); }
+}
+@keyframes heartFloat {
+  0%   { opacity: 0; transform: translateY(0) scale(.6) rotateY(0deg); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-84px) scale(1.2) rotateY(180deg); }
+}
+
+/* ---------- 数字 + 按钮 ---------- */
+.pen-stats {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.pen-stat {
+  flex: 1;
+  background: linear-gradient(180deg, #fff 0%, #FFEFF4 100%);
+  border-radius: 14px;
+  padding: 8px 4px 6px;
+  box-shadow: 0 3px 10px rgba(233, 92, 130, .22), inset 0 1px 0 #fff;
+}
+.pen-stat b {
+  display: block;
+  font-size: 20px;
+  color: #5C4033;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.pen-stat span { font-size: 11px; color: #5C4033; font-weight: 600; }
+
+.pen-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.pen-actions .btn {
+  flex: 1;
+  background: #FF8FAB;
+  color: #5C4033;
+  box-shadow: 0 6px 16px rgba(221, 74, 116, .26);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.pen-actions .btn:active { transform: translateY(2px) scale(.98); }
+#pen-hint { margin: 8px 2px 2px; color: #5C4033; opacity: 1; font-size: 12.5px; font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pig, .pig *, .pig-float, .pig-shadow, .pen-pop, .pig-zzz, .pig-crown { animation: none !important; transition: none !important; }
+}
+
+/* ---------- WebGL 3D 小猪（pig3d.js 生效时用这个） ---------- */
+.pig-3d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  transition: opacity .5s ease;
+}
+.pen-scene.is3d .pig-3d {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: grab;
+}
+.pen-scene.is3d .pig-3d:active { cursor: grabbing; }
+/* 3D 打开时把 CSS 小猪和它的投影淡出，避免两层叠在一起 */
+.pen-scene.is3d .pig,
+.pen-scene.is3d .pig-shadow { opacity: 0; pointer-events: none; transition: opacity .4s ease; }
+.pig { transition: transform .6s cubic-bezier(.2, .8, .2, 1), opacity .4s ease; }
+
+/* ---------- 小猪自己的两段动画（CSS 版小猪 / WebGL 降级时用） ---------- */
+@keyframes pig-idle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.02); }
+}
+@keyframes pig-move {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(15px, -10px); }
+  50% { transform: translate(30px, 5px); }
+  75% { transform: translate(10px, 15px); }
+  100% { transform: translate(0, 0); }
+}
+.pig-element { animation: pig-idle 2s infinite ease-in-out, pig-move 4s infinite alternate ease-in-out; }
+/* 睡着的时候不乱跑，只慢慢呼吸 */
+.pig-element.sleeping { animation: pig-idle 6s infinite ease-in-out; }

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FDF8F5">
+<title>小猪日记 · 我们的点滴</title>
+<meta name="description" content="专属你们俩的小猪日记，记录每一刻甜蜜。">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="小猪日记">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!-- iOS 主屏启动图：从桌面图标打开时先显示这一屏，避免白屏 -->
+<link rel="apple-touch-startup-image" href="splash/1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="splash/1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="splash/1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="splash/1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="splash/1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="splash/1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="splash/1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="splash/828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)">
+<link rel="apple-touch-startup-image" href="splash/750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
+<link rel="apple-touch-startup-image" href="splash/1668x2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)">
+<link rel="apple-touch-startup-image" href="splash/2048x2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐷</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/sync.css">
+  <link rel="stylesheet" href="css/pen.css">
+</head>
+<body>
+
+  <!-- ===== 顶部 ===== -->
+  <header class="app-header">
+    <span class="pig-logo" aria-hidden="true">🐷</span>
+    <h1>小猪日记</h1>
+    <div class="sub">今日投喂 · 把我们的点滴填满猪窝</div>
+  </header>
+
+  <!-- ===== 首页 ===== -->
+  <section class="page" id="page-home" aria-label="首页">
+    <div class="hero">
+      <span class="big-pig" aria-hidden="true">🐽</span>
+      <h2>欢迎来到小猪日记</h2>
+      <p>饲养员和她的猪猪，每一天都值得被记住</p>
+      <div class="hearts" aria-hidden="true"></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat"><b id="stat-entries">0</b><span>条点滴</span></div>
+      <div class="stat"><b id="stat-days">0</b><span>一起走过的天</span></div>
+      <div class="stat"><b id="stat-items">0</b><span>件小物件</span></div>
+    </div>
+
+    <div class="card heat-card">
+      <div class="heat-title">最近 14 天 · 猪窝热度</div>
+      <div class="heat" id="heat"></div>
+      <div class="heat-range" id="heat-range"></div>
+      <div class="heat-legend"><i data-l="1"></i>打卡 <i data-l="2"></i>1 条日记 <i data-l="3"></i>2 条以上</div>
+    </div>
+
+    <div id="onthisday"></div>
+
+    <div class="home-actions">
+      <button class="btn" id="go-write">＋ 写一条新日记</button>
+      <button class="btn ghost" id="go-checkin">📮 今日打卡</button>
+    </div>
+  </section>
+
+  <!-- ===== 时间线 ===== -->
+  <section class="page" id="page-timeline" aria-label="时间线">
+    <div class="section-title"><span class="paw" aria-hidden="true">🐾</span>我们的时间线<span class="count" id="tl-count"></span></div>
+
+    <div class="search-row">
+      <div class="search">
+        <span class="si" aria-hidden="true">🔍</span>
+        <input id="tl-search" type="search" placeholder="搜索标题、内容或标签" aria-label="搜索日记" autocomplete="off">
+        <button type="button" id="tl-clear" aria-label="清空搜索" hidden>✕</button>
+      </div>
+    </div>
+    <div class="chips" id="tag-bar"></div>
+
+    <div class="card">
+      <div class="timeline" id="tl-list"></div>
+    </div>
+  </section>
+
+  <!-- ===== 写点滴 ===== -->
+  <section class="page" id="page-write" aria-label="写日记">
+    <div class="section-title"><span class="paw" aria-hidden="true">🐾</span><span id="write-title">写一条新日记</span></div>
+    <div class="card">
+      <form id="entry-form" novalidate>
+        <div class="field">
+          <label for="e-date">这一天</label>
+          <input id="e-date" type="date">
+        </div>
+        <div class="field">
+          <label>今天是什么心情？</label>
+          <div class="mood-pick" id="entry-mood" role="group" aria-label="选择心情">
+            <span role="button" tabindex="0" aria-pressed="false">🥰</span>
+            <span role="button" tabindex="0" aria-pressed="false">😊</span>
+            <span role="button" tabindex="0" aria-pressed="false">🥲</span>
+            <span role="button" tabindex="0" aria-pressed="false">😴</span>
+            <span role="button" tabindex="0" aria-pressed="false">🤪</span>
+            <span role="button" tabindex="0" aria-pressed="false">🥺</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="e-title">标题</label>
+          <input id="e-title" type="text" placeholder="例如：一起去喝了奶茶" maxlength="60" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="e-text">内容</label>
+          <textarea id="e-text" placeholder="小猪想记住的细节……"></textarea>
+        </div>
+        <div class="field">
+          <label for="e-tags">标签（用逗号分隔，可选）</label>
+          <input id="e-tags" type="text" placeholder="例如：奶茶, 约会, 周末" autocomplete="off">
+        </div>
+        <button class="btn block" type="submit" id="entry-submit">🐽 小猪记下啦</button>
+        <button class="btn block ghost" type="button" id="entry-cancel" hidden>取消编辑</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== 小猪屋（打卡 + 小物件） ===== -->
+  <section class="page" id="page-items" aria-label="小猪窝">
+    <div class="section-title"><span class="paw" aria-hidden="true">🐾</span>小猪窝 · 养成</div>
+    <div class="pen-card" id="pen-card">
+      <div class="pen-scene" id="pen-scene">
+        <span class="pen-glow" aria-hidden="true"></span>
+        <canvas class="pig-3d" id="pig3d" aria-hidden="true"></canvas>
+        <span class="pig-shadow" aria-hidden="true"></span>
+        <button class="pig pig-element" id="pig" type="button" aria-label="摸摸小猪的头">
+          <span class="pig-float" aria-hidden="true">
+            <span class="pig-ear left"></span>
+            <span class="pig-ear right"></span>
+            <span class="pig-head">
+              <span class="pig-eye left"><i></i></span>
+              <span class="pig-eye right"><i></i></span>
+              <span class="pig-cheek left"></span>
+              <span class="pig-cheek right"></span>
+              <span class="pig-snout"><i></i><i></i></span>
+              <span class="pig-mouth"></span>
+            </span>
+            <span class="pig-crown" id="pig-crown" hidden>👑</span>
+          </span>
+        </button>
+        <span class="pig-zzz" id="pig-zzz" aria-hidden="true">z</span>
+        <div class="pen-fx" id="pen-fx" aria-hidden="true"></div>
+      </div>
+
+      <div class="pen-stats">
+        <div class="pen-stat"><b id="pen-hunger">0</b><span>饱腹度</span></div>
+        <div class="pen-stat"><b id="pen-growth">0</b><span>成长值</span></div>
+        <div class="pen-stat"><b id="pen-streak">0</b><span>连续互动</span></div>
+      </div>
+
+      <div class="pen-actions">
+        <button class="btn sm" type="button" id="btn-feed">🍎 喂食</button>
+        <button class="btn sm ghost" type="button" id="btn-pat">🤚 摸头</button>
+        <button class="btn sm ghost" type="button" id="btn-sleep">😴 睡觉</button>
+      </div>
+      <p class="hint" id="pen-hint">点点小猪摸摸头，喂饱它就会慢慢长大～</p>
+    </div>
+
+    <div class="section-title"><span class="paw" aria-hidden="true">🐾</span>今日打卡</div>
+    <div class="card">
+      <form id="check-form" novalidate>
+        <div class="check-grid">
+          <div class="field">
+            <label for="c-weather">天气</label>
+            <select id="c-weather">
+              <option value="晴">☀️ 晴</option>
+              <option value="多云">⛅ 多云</option>
+              <option value="雨">🌧️ 雨</option>
+              <option value="雪">❄️ 雪</option>
+              <option value="雾">🌫️ 雾</option>
+              <option value="夜">🌙 夜</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>今天的心情猪</label>
+            <div class="mood-pick" id="c-mood" role="group" aria-label="选择心情色">
+              <span role="button" tabindex="0" aria-pressed="false">🩷</span>
+              <span role="button" tabindex="0" aria-pressed="false">🩵</span>
+              <span role="button" tabindex="0" aria-pressed="false">🤍</span>
+              <span role="button" tabindex="0" aria-pressed="false">🩶</span>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="c-quote">今日一句</label>
+          <input id="c-quote" type="text" placeholder="今天最想说的一句话" maxlength="80" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="c-song">一起听的歌</label>
+          <input id="c-song" type="text" placeholder="歌名 / 歌手" maxlength="60" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="c-note">小备注</label>
+          <input id="c-note" type="text" placeholder="今天发生的小事" maxlength="120" autocomplete="off">
+        </div>
+        <button class="btn block" type="submit">🐾 打卡完成</button>
+      </form>
+    </div>
+
+    <div class="section-title"><span class="paw" aria-hidden="true">🐾</span>打卡小存档</div>
+    <div class="card" id="checkin-history"></div>
+
+    <div class="section-title"><span class="paw" aria-hidden="true">🐾</span>小猪屋 · 小物件<span class="count" id="item-count"></span></div>
+    <div class="card">
+      <form id="item-form" novalidate>
+        <div class="field">
+          <label>选一个图标</label>
+          <input id="i-icon" type="hidden" value="🧸">
+          <div id="emoji-picker" class="emoji-picker" role="group" aria-label="选择小物件图标"></div>
+        </div>
+        <div class="field">
+          <label for="i-name">物件名称</label>
+          <input id="i-name" type="text" placeholder="例如：第一次约会的电影票" maxlength="40" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="i-desc">小故事</label>
+          <input id="i-desc" type="text" placeholder="关于它的回忆（可选）" maxlength="80" autocomplete="off">
+        </div>
+        <button class="btn block" type="submit">🧸 收藏进小猪屋</button>
+      </form>
+    </div>
+
+    <div class="item-grid" id="item-grid"></div>
+  </section>
+
+  <!-- ===== 纪念日 ===== -->
+  <section class="page" id="page-milestone" aria-label="纪念日">
+    <div class="section-title"><span class="paw" aria-hidden="true">🐾</span>我们的日子</div>
+    <div id="together-days"></div>
+    <div id="ms-list"></div>
+
+    <div class="section-title"><span class="paw" aria-hidden="true">🐾</span>添加纪念日</div>
+    <div class="card">
+      <form id="ms-form" novalidate>
+        <div class="field">
+          <label for="m-type">类型</label>
+          <select id="m-type">
+            <option value="anniversary">💍 在一起的日子</option>
+            <option value="birthday">🎂 生日</option>
+            <option value="custom">🎈 其他纪念日</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="m-title">名字</label>
+          <input id="m-title" type="text" placeholder="例如：第一次牵手" maxlength="40" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="m-date">日期</label>
+          <input id="m-date" type="date">
+        </div>
+        <button class="btn block" type="submit">🎈 加入倒数</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== 我们 ===== -->
+  <section class="page" id="page-us" aria-label="我们">
+    <div class="section-title"><span class="paw" aria-hidden="true">🐾</span>关于我们</div>
+    <div class="card">
+      <div class="us-heart" aria-hidden="true">🐷💗🐽</div>
+      <div class="us-names"><span id="us-a">小猪</span> &amp; <b id="us-b">饲养员</b></div>
+      <div class="us-line">今日投喂 · 把猪窝填满</div>
+      <div class="us-quote">"小猪今日心情：多云转晴，因为见到了饲养员。"</div>
+
+      <form id="us-form" novalidate>
+        <div class="field">
+          <label for="us-text-a">TA 的称呼</label>
+          <input id="us-text-a" type="text" placeholder="小猪" maxlength="20" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="us-text-b">你的称呼</label>
+          <input id="us-text-b" type="text" placeholder="饲养员" maxlength="20" autocomplete="off">
+        </div>
+        <button class="btn block" type="submit">🐽 保存称呼</button>
+      </form>
+    </div>
+
+    <div class="card" id="sync-card" hidden>
+      <div class="section-sub">🔗 两台手机同步</div>
+      <p class="hint">连上之后，谁写的另一边几秒就能看到；<b>删除也会同步</b>。日记在本机加密后才上传，服务器只存乱码。</p>
+      <div id="sync-off">
+        <button class="btn block" type="button" id="btn-sync-create">🐷 我先开一个，生成配对码</button>
+        <div class="field" style="margin-top:12px">
+          <label for="sync-code">或者填对方给的配对码</label>
+          <input id="sync-code" type="text" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        </div>
+        <button class="btn ghost block" type="button" id="btn-sync-join">🔗 连上对方的</button>
+      </div>
+      <div id="sync-on" hidden>
+        <div class="sync-code" id="sync-code-show"></div>
+        <div class="data-row">
+          <button class="btn sm ghost" type="button" id="btn-sync-copy">复制配对码</button>
+          <button class="btn sm" type="button" id="btn-sync-now">立即同步</button>
+          <button class="btn sm danger" type="button" id="btn-sync-off">断开</button>
+        </div>
+      </div>
+      <p class="hint" id="sync-status"></p>
+    </div>
+
+    <div class="card">
+      <div class="section-sub">数据存在这台设备的浏览器里</div>
+      <div class="data-summary" id="data-summary"></div>
+      <div class="data-row">
+        <button class="btn sm" type="button" id="btn-export">⬇️ 导出备份</button>
+        <button class="btn sm ghost" type="button" id="btn-share" hidden>📤 分享给对方</button>
+        <label class="btn sm ghost" for="file-import" role="button" tabindex="0">⬆️ 导入备份</label>
+        <input id="file-import" type="file" accept="application/json,.json" hidden>
+        <button class="btn sm danger" type="button" id="btn-clear">🗑️ 清空数据</button>
+      </div>
+      <p class="hint">💡 换手机、换浏览器或清理缓存前，记得先导出一份备份。<br>导入使用合并方式，不会覆盖已有的回忆。<br>📱 两台手机想共用一份日记：A 点「分享给对方」发出去，B 点「导入备份」选中它即可（合并，不覆盖）。</p>
+    </div>
+
+    <div class="card" id="install-card" hidden>
+      <div class="section-sub">📲 装到手机主屏</div>
+      <p class="hint" id="install-hint"></p>
+      <button class="btn block" type="button" id="btn-install" hidden>➕ 添加到主屏幕</button>
+      <a class="btn block ghost" id="btn-apk" href="./dl/pig-diary.apk" download hidden>⬇️ 下载安卓安装包（APK）</a>
+      <p class="hint" id="apk-note" hidden></p>
+      <p class="hint" id="install-note" hidden>装好后从桌面图标打开，全屏无地址栏，断网也能写日记。</p>
+    </div>
+  </section>
+
+  <!-- ===== 底部导航 ===== -->
+  <nav class="tabbar" aria-label="主导航">
+    <button data-page="home" class="active" aria-current="page"><span class="ic" aria-hidden="true">🏠</span>首页</button>
+    <button data-page="timeline"><span class="ic" aria-hidden="true">📖</span>时间线</button>
+    <button data-page="write"><span class="ic" aria-hidden="true">✏️</span>写日记</button>
+    <button data-page="items"><span class="ic" aria-hidden="true">🐷</span>小猪窝</button>
+    <button data-page="milestone"><span class="ic" aria-hidden="true">🎂</span>纪念日</button>
+    <button data-page="us"><span class="ic" aria-hidden="true">💑</span>我们</button>
+  </nav>
+
+  <button id="toTop" title="回到顶部" aria-label="回到顶部">🐽</button>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <noscript><div class="card" style="margin-top:20px">这个页面需要开启 JavaScript 才能记录小猪日记 🐷</div></noscript>
+
+  <script src="js/data.js"></script>
+  <script src="js/sync-config.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pen.js"></script>
+  <script src="js/pig-motion.js"></script>
+  <script src="js/pig3d.js"></script>
+</body>
+</html>
