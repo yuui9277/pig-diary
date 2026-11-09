@@ -898,6 +898,12 @@
         return;
       }
 
+      // 点卡片本身（不是里面的按钮）= 打开编辑：手机上比戳「编辑」两个字好按多了
+      if ((el = ev.target.closest('.tl-item'))) {
+        startEdit(el.getAttribute('data-id'));
+        return;
+      }
+
       if ((el = ev.target.closest('[data-tag]'))) {
         state.tag = el.getAttribute('data-tag');
         renderTimeline();

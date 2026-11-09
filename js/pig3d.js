@@ -30,12 +30,14 @@
     }
     if (!renderer || !renderer.getContext()) return;
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    // 像素比按设备能力分档：低端机 1.5，常规 2，高分屏最多 2（再高只是白烧电）
+    var dprCap = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ? 1.5 : 2;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, dprCap));
     if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
     if (THREE.SRGBColorSpace && 'outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace;
     if (THREE.ACESFilmicToneMapping) {
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 0.9;
+      renderer.toneMappingExposure = 0.96;
     }
     // 真阴影：手办最怕"飘"在画面里
     if (THREE.PCFSoftShadowMap) {
@@ -118,10 +120,10 @@
     function clay(color, opts) {
       opts = opts || {};
       var params = {
-        color: color,
+        color: new THREE.Color(color).convertSRGBToLinear(),
         roughness: opts.roughness == null ? 0.88 : opts.roughness,
         metalness: 0,
-        emissive: opts.emissive || 0x000000,
+        emissive: new THREE.Color(opts.emissive || 0x000000).convertSRGBToLinear(),
         emissiveIntensity: opts.emissiveIntensity == null ? 0.03 : opts.emissiveIntensity,
         transparent: !!opts.transparent,
         opacity: opts.opacity == null ? 1 : opts.opacity
@@ -185,21 +187,21 @@
       return tex;
     }
 
-    var skinMat = clay(0xF08FA4, { roughness: 0.58 });
+    var skinMat = clay(0xFF93B0, { roughness: 0.4 });
     var M = {
       skin: skinMat,
       onesie: new THREE.MeshPhysicalMaterial({
         map: onesieTexture(), roughness: 0.95, metalness: 0,
         clearcoat: 0.02, clearcoatRoughness: 0.8, envMapIntensity: 0.06
       }),
-      skinDeep: clay(0xEE8CA2, { roughness: 0.64 }),
-      earInner: clay(0xE97C93, { roughness: 0.7 }),
-      nose: clay(0xF07A93, { roughness: 0.5 }),
-      noseHole: clay(0xB84A62, { roughness: 0.72 }),
-      eye: clay(0x2C2226, { roughness: 0.12, emissiveIntensity: 0, clearcoat: 1, clearcoatRoughness: 0.08 }),
+      skinDeep: clay(0xF983A2, { roughness: 0.44 }),
+      earInner: clay(0xFB8CA9, { roughness: 0.48 }),
+      nose: clay(0xFFA6BF, { roughness: 0.34 }),
+      noseHole: clay(0xC2526C, { roughness: 0.55 }),
+      eye: new THREE.MeshBasicMaterial({ color: new THREE.Color(0x261A22).convertSRGBToLinear() }),
       glint: new THREE.MeshBasicMaterial({ color: 0xFFFFFF }),
       blush: clay(0xFF7E9B, { roughness: 1, emissive: 0x000000, emissiveIntensity: 0 }),
-      mouth: clay(0xA9405A, { roughness: 0.75 }),
+      mouth: clay(0xA63B55, { roughness: 0.5 }),
       cream: clay(0xFFF7EF, { roughness: 0.7 }),
       orange: clay(0xEF8A2A, { roughness: 0.48, clearcoat: 0.4 }),
       orangePith: clay(0xFFE7C4, { roughness: 0.78 }),
@@ -241,6 +243,17 @@
     M.skin.roughness = 0.55;
     M.onesie.roughness = 0.85;
 
+    /* ---------- 卡通描边：只留一圈很细的深色边，把形状"勾"出来 ---------- */
+    function addOutline(mesh, color, k) {
+      var mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(color).convertSRGBToLinear(), side: THREE.BackSide });
+      var o = new THREE.Mesh(mesh.geometry, mat);
+      o.scale.setScalar(k == null ? 1.03 : k);
+      o.userData.noShadow = true;
+      o.renderOrder = -1;
+      mesh.add(o);
+      return o;
+    }
+
     /* ---------- 小猪 ---------- */
     var pig = new THREE.Group();
     scene.add(pig);
@@ -255,6 +268,7 @@
     ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
     var body = new THREE.Mesh(new THREE.LatheGeometry(bodyProfile, 56), M.onesie);
     rig.add(body);
+    addOutline(body, 0xE2678C, 1.014);
 
     // 连体服的领口
     var collar = new THREE.Mesh(new THREE.TorusGeometry(0.33, 0.055, 12, 28), M.cream);
@@ -270,24 +284,26 @@
 
     // 头
     var head = new THREE.Group();
-    head.position.set(0, 1.5, 0.02);
-    head.scale.setScalar(0.72);
+    head.position.set(0, 1.62, 0.02);
+    head.scale.setScalar(0.86);
     rig.add(head);
 
     var skull = new THREE.Mesh(new THREE.SphereGeometry(0.93, 48, 32), M.skin);
     skull.scale.set(1.0, 0.97, 0.96);
     head.add(skull);
+    addOutline(skull, 0xE2678C, 1.028);
 
     // 鼻子
-    var snout = new THREE.Mesh(new THREE.SphereGeometry(0.17, 32, 22), M.nose);
-    snout.scale.set(1.22, 0.88, 0.7);
-    snout.position.set(0, -0.13, 0.86);
+    var snout = new THREE.Mesh(new THREE.SphereGeometry(0.205, 34, 24), M.nose);
+    snout.scale.set(1.26, 0.9, 0.72);
+    snout.position.set(0, -0.145, 0.885);
     head.add(snout);
+    addOutline(snout, 0xE2678C, 1.05);
 
     [-1, 1].forEach(function (s) {
-      var n = new THREE.Mesh(new THREE.SphereGeometry(0.026, 12, 10), M.noseHole);
-      n.scale.set(1, 1.25, 0.5);
-      n.position.set(s * 0.052, -0.125, 0.95);
+      var n = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 10), M.noseHole);
+      n.scale.set(1, 1.22, 0.5);
+      n.position.set(s * 0.062, -0.14, 0.985);
       head.add(n);
     });
 
@@ -295,38 +311,31 @@
     var eyes = [];
     [-1, 1].forEach(function (s) {
       var eyeGroup = new THREE.Group();
-      eyeGroup.position.set(s * 0.31, 0.1, 0.83);
+      eyeGroup.position.set(s * 0.325, 0.13, 0.85);
       head.add(eyeGroup);
 
-      var e = new THREE.Mesh(new THREE.SphereGeometry(0.1, 28, 20), M.eye);
-      e.scale.set(1, 1.14, 0.8);
+      var e = new THREE.Mesh(new THREE.SphereGeometry(0.178, 32, 24), M.eye);
+      e.scale.set(1, 1.12, 0.8);
       eyeGroup.add(e);
 
       // 虹膜：让黑豆眼有一点点层次，不是纯黑圆点
-      var iris = new THREE.Mesh(new THREE.SphereGeometry(0.062, 20, 14), clay(0x4A383C, { roughness: 0.25 }));
-      iris.scale.set(1, 1.1, 0.55);
-      iris.position.z = 0.045;
+      var iris = new THREE.Mesh(new THREE.SphereGeometry(0.112, 22, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x4A3438).convertSRGBToLinear() }));
+      iris.scale.set(1, 1.08, 0.5);
+      iris.position.z = 0.078;
       iris.userData.noShadow = true;
       eyeGroup.add(iris);
 
-      var glint = new THREE.Mesh(new THREE.SphereGeometry(0.029, 14, 12), M.glint);
-      glint.position.set(-0.024, 0.03, 0.07);
+      var glint = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 14), M.glint);
+      glint.position.set(-0.045, 0.052, 0.122);
       glint.scale.set(1, 1, 0.55);
       glint.userData.noShadow = true;
       eyeGroup.add(glint);
 
-      var glint2 = new THREE.Mesh(new THREE.SphereGeometry(0.014, 12, 10), M.glint);
-      glint2.position.set(0.027, -0.033, 0.068);
+      var glint2 = new THREE.Mesh(new THREE.SphereGeometry(0.026, 12, 10), M.glint);
+      glint2.position.set(0.048, -0.058, 0.118);
       glint2.userData.noShadow = true;
       eyeGroup.add(glint2);
 
-      // 上眼睑：一条浅浅的眼皮线，眼神会聚一点
-      var lid = new THREE.Mesh(new THREE.TorusGeometry(0.106, 0.013, 8, 20, Math.PI * 0.92), M.skinDeep);
-      lid.rotation.z = 0.04;
-      lid.scale.set(1, 0.7, 1);
-      lid.position.set(0, 0.03, 0.028);
-      lid.userData.noShadow = true;
-      eyeGroup.add(lid);
 
       eyes.push(eyeGroup);
     });
@@ -346,10 +355,10 @@
       if (THREE.sRGBEncoding) tex.encoding = THREE.sRGBEncoding;
       [-1, 1].forEach(function (s) {
         var b = new THREE.Mesh(
-          new THREE.PlaneGeometry(0.46, 0.32),
-          new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.65, depthWrite: false })
+          new THREE.PlaneGeometry(0.56, 0.4),
+          new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.8, depthWrite: false })
         );
-        b.position.set(s * 0.49, -0.13, 0.775);
+        b.position.set(s * 0.52, -0.155, 0.775);
         b.rotation.y = s * 0.46;
         b.rotation.z = -s * 0.08;
         b.renderOrder = 3;
@@ -360,10 +369,10 @@
 
     // 嘴
     var mouthGroup = new THREE.Group();
-    mouthGroup.position.set(0, -0.29, 0.79);
+    mouthGroup.position.set(0, -0.315, 0.805);
     head.add(mouthGroup);
 
-    var smile = new THREE.Mesh(new THREE.TorusGeometry(0.062, 0.019, 8, 18, Math.PI), M.mouth);
+    var smile = new THREE.Mesh(new THREE.TorusGeometry(0.088, 0.021, 8, 20, Math.PI), M.mouth);
     smile.rotation.z = Math.PI;
     mouthGroup.add(smile);
 
@@ -376,19 +385,20 @@
     var ears = [];
     [-1, 1].forEach(function (s) {
       var pivot = new THREE.Group();
-      pivot.position.set(s * 0.62, 0.44, -0.02);
+      pivot.position.set(s * 0.645, 0.5, -0.02);
       head.add(pivot);
 
-      var ear = new THREE.Mesh(new THREE.SphereGeometry(0.3, 26, 18), M.skinDeep);
-      ear.scale.set(0.86, 1.5, 0.42);
-      ear.position.set(s * 0.16, -0.16, 0);
-      ear.rotation.z = s * 0.42;
+      var ear = new THREE.Mesh(new THREE.SphereGeometry(0.31, 26, 18), M.skinDeep);
+      ear.scale.set(0.98, 1.22, 0.5);
+      ear.position.set(s * 0.15, -0.1, 0);
+      ear.rotation.z = s * 0.3;
       pivot.add(ear);
+      addOutline(ear, 0xE2678C, 1.045);
 
-      var inner = new THREE.Mesh(new THREE.SphereGeometry(0.2, 22, 16), M.earInner);
-      inner.scale.set(0.72, 1.35, 0.3);
-      inner.position.set(s * 0.19, -0.17, 0.09);
-      inner.rotation.z = s * 0.42;
+      var inner = new THREE.Mesh(new THREE.SphereGeometry(0.21, 22, 16), M.earInner);
+      inner.scale.set(0.82, 1.08, 0.34);
+      inner.position.set(s * 0.175, -0.11, 0.1);
+      inner.rotation.z = s * 0.3;
       pivot.add(inner);
 
       ears.push(pivot);
@@ -868,7 +878,7 @@
       camera.aspect = w / h;
 
       var aspect = w / h;
-      var dist = aspect < 1.5 ? 7.0 : 6.4;
+      var dist = aspect < 1.5 ? 7.6 : 6.95;   // 头变大后拉远一点，四周留白
       camera.position.set(1.05, 0.95 + dist * 0.245, dist);
       camera.lookAt(0, 1.1, 0);
       camera.updateProjectionMatrix();
@@ -929,16 +939,34 @@
     canvas.addEventListener('pointercancel', onUp);
     canvas.addEventListener('pointerleave', function () { if (state.dragging) onUp(); });
 
-    /* ---------- 每帧 ---------- */
-    function frame() {
+    /* ---------- 每帧：看不见的时候真正停下来，不空转 ---------- */
+    var looping = false;
+
+    function sceneShowing() {
+      var pageItems = document.getElementById('page-items');
+      return !!(pageItems && pageItems.classList.contains('show') && !document.hidden);
+    }
+
+    function startLoop() {
+      if (looping || stopped) return;
+      looping = true;
+      clock.getDelta();               // 丢掉暂停期间攒下的时间，避免一恢复就跳一大步
       requestAnimationFrame(frame);
-      if (stopped) return;
+    }
+
+    function stopLoop() {
+      looping = false;
+    }
+
+    function frame() {
+      if (!looping || stopped) return;
+      if (!sceneShowing()) {          // 切走了 / 后台了 / 页面藏了：彻底停
+        looping = false;
+        return;
+      }
+      requestAnimationFrame(frame);
       var dt = Math.min(clock.getDelta(), 0.05);
       time += dt;
-
-      var pageItems = document.getElementById('page-items');
-      var visible = pageItems && pageItems.classList.contains('show') && !document.hidden;
-      if (!visible) return;
 
       var now = Date.now();
 
@@ -1217,7 +1245,15 @@
 
     resize();
     renderer.render(scene, camera);
-    requestAnimationFrame(frame);
+    startLoop();
+
+    // 回到前台 / 切回小猪窝时重新开机（后台时浏览器本来也会掐掉 rAF，这里只是收尾）
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stopLoop(); else if (sceneShowing()) startLoop();
+    });
+    window.addEventListener('hashchange', function () {
+      if (sceneShowing()) startLoop();
+    });
   }
 
   /* ---------- 什么时候才去拉 three.js（总共 600KB） ----------
@@ -1244,19 +1280,27 @@
 
     function start() {
       armed = true;
+      try { localStorage.setItem('pig3d.seen', '1'); } catch (e) {}
       boot();
       // 刚刚进来时的形态（体型/王冠/睡眠）补一次，免得 3D 晚上线就跟着清零
       if (window.PigPen && window.PigPen.render) {
         try { window.PigPen.render(); } catch (e) {}
       }
+      // 系统开了「减少动态效果」：小窝不自动乱走，只保留轻轻的呼吸
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (window.PigMotion && window.PigMotion.disable) window.PigMotion.disable();
+      }
     }
 
     if (window.THREE) { start(); return; }
+    // 引擎要下载一会儿，先给个「小窝正在搭建」的提示，别让人对着空台子等
+    var box = document.getElementById('pen-scene');
+    if (box) box.classList.add('pig-loading');
     var s = document.createElement('script');
     s.src = 'js/vendor/three.min.js';
     s.async = true;
-    s.onload = start;
-    s.onerror = function () { sceneBoxSafe(); };
+    s.onload = function () { if (box) box.classList.remove('pig-loading'); start(); };
+    s.onerror = function () { if (box) box.classList.remove('pig-loading'); sceneBoxSafe(); };
     document.head.appendChild(s);
   }
 
@@ -1281,4 +1325,24 @@
   } else {
     setTimeout(function () { armRetry(14); }, 0);
   }
+
+  /* ---------- 回访预热：来过小猪窝的人，空闲时先把 3D 引擎拉进缓存 ----------
+   * 第一次访问不预取（不让新用户多花流量）；第二次进小窝几乎秒开。
+   */
+  (function prefetchForReturning() {
+    var seen = false;
+    try { seen = localStorage.getItem('pig3d.seen') === '1'; } catch (e) { return; }
+    if (!seen || window.THREE) return;
+    var run = function () {
+      if (armed || document.querySelector('link[data-prefetch="three"]')) return;
+      var link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.as = 'script';
+      link.href = 'js/vendor/three.min.js';
+      link.setAttribute('data-prefetch', 'three');
+      document.head.appendChild(link);
+    };
+    if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 2500 });
+    else setTimeout(run, 1800);
+  })();
 })();

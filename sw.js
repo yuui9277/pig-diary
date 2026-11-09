@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var VERSION = 'pig-diary-v3.0.0';
+var VERSION = 'pig-diary-v3.1.1';
 var SHELL = [
   './',
   './index.html',
@@ -28,7 +28,12 @@ var SHELL = [
 self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(VERSION)
-      .then(function (cache) { return cache.addAll(SHELL); })
+      .then(function (cache) {
+        // 逐个装：某个文件 404 或超时，不会把整份离线缓存一起废掉
+        return Promise.all(SHELL.map(function (url) {
+          return cache.add(url).catch(function () { return null; });
+        }));
+      })
       .then(function () { return self.skipWaiting(); })
   );
 });
@@ -74,6 +79,10 @@ self.addEventListener('fetch', function (event) {
   event.respondWith(
     caches.open(VERSION).then(function (cache) {
       return cache.match(request).then(function (hit) {
+        // 3D 引擎和图标是「基本不变」的大文件：命中了就直接用，不再浪费一次流量
+        var immortal = hit && (url.pathname.indexOf('/js/vendor/') >= 0 || url.pathname.indexOf('/icons/') >= 0);
+        if (immortal) return hit;
+
         var network = fetch(request).then(function (response) {
           if (response && response.ok) cache.put(request, response.clone());
           return response;

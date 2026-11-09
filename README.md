@@ -268,3 +268,17 @@ window.PIG_SYNC_CONFIG = { base: 'https://api.npoint.io', bin: '你自己的仓�
 - **不丢状态**：3D 晚于页面加载完成时，会主动同步体型 / 王冠 / 睡眠状态。
 - **尊重系统设置**：`prefers-reduced-motion: reduce` 时小猪只呼吸、不乱跑。
 - 细节和版本对照见 [CHANGELOG.md](CHANGELOG.md)。
+
+## v3.1 优化（传输 / 缓存 / 电量）
+
+- **静态服务器换成 `tools/serve-dist.mjs`**（Node 版，替代 `python -m http.server`）：
+  brotli/gzip 自动压缩、ETag 304、分级缓存头。首页传输 **195.7 KB → 66.5 KB**，
+  `three.min.js` **603 KB → 131.7 KB**（br，压缩 113 ms），小猪窝整页 **约 800 KB → 198 KB**。
+- **缓存分级**：`/js/vendor/`、`/icons/` 打 `immutable`（一年强缓存），`html`/`sw.js` 走 `no-cache`，
+  js/css 一小时。SW 里对这两个目录命中即返回，不再每次回源。
+- **离线更稳**：Service Worker 预缓存改为逐个 `cache.add`，单个文件 404 不会让整份离线包失效。
+- **回访预热**：来过小猪窝的人，页面空闲时才预取 three.js（首次访问不多花流量）。
+- **低端机不硬撑**：`hardwareConcurrency ≤ 4` 的设备把像素比压到 1.5。
+- **真的停下来**：离开小猪窝 / 切到后台时渲染循环不再排下一帧（实测 3 秒 CPU 占用 114 ms → 24 ms，−79%）。
+- **等待有反馈**：引擎下载期间显示「小窝正在搭建…」，下载失败自动退回 CSS 小猪。
+- 起站脚本：根目录 `启动小猪日记站点.cmd`（起服务器 + 隧道，直接打印网址）。

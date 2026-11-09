@@ -1,4 +1,4 @@
-﻿/* ===== 小猪窝：3D 卡通养成 =====
+/* ===== 小猪窝：3D 卡通养成 =====
  * 全部用 CSS 渐变 + 阴影做出体积感，没有一张图片。
  * 分层：pen-scene（透视）→ pig（体型缩放）→ pig-float（呼吸/漂浮）→ 各部件
  */
@@ -36,6 +36,26 @@
 .pen-scene.sleeping .pen-glow { opacity: 0; }
 /* 3D 打开后不需要这层 CSS 柔光，不然会把房间颜色冲淡 */
 .pen-scene.is3d .pen-glow { opacity: 0; }
+
+/* 3D 引擎（约 120KB）还在下载时：一支小进度笔，别让人对着空台子等 */
+.pen-scene.pig-loading::after {
+  content: "小窝正在搭建…";
+  position: absolute;
+  left: 0; right: 0; bottom: 14px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: rgba(120, 86, 104, .62);
+  animation: pigLoadingPulse 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes pigLoadingPulse {
+  0%, 100% { opacity: .35; }
+  50% { opacity: .9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pen-scene.pig-loading::after { animation: none; opacity: .6; }
+}
 
 /* 背景柔光 */
 .pen-glow {
