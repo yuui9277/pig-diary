@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var VERSION = 'pig-diary-v3.5.0';
+var VERSION = 'pig-diary-v3.6.0';
 var SHELL = [
   './',
   './index.html',
