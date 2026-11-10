@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>小猪图片自检</title>
+<style>
+  body{margin:0;padding:18px;background:#FFF0F6;color:#4A3B3A;
+       font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;}
+  h1{font-size:18px;margin:0 0 4px;color:#C2557A}
+  .ver{font-size:12px;color:#B0708A;margin-bottom:14px}
+  .card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;
+        box-shadow:0 6px 18px rgba(255,143,171,.18)}
+  .card h2{font-size:14px;margin:0 0 8px;color:#8A4A62}
+  .card img{display:block;max-width:100%;height:auto;background:#FFF8FB;border-radius:10px}
+  .meta{font-size:12px;color:#9C6E80;margin-top:8px;line-height:1.7;word-break:break-all}
+  .ok{color:#2E7D32;font-weight:600}
+  .bad{color:#C62828;font-weight:600}
+  .tip{font-size:12px;color:#9C6E80;line-height:1.8}
+  code{background:#FFF0F6;padding:1px 4px;border-radius:4px;font-size:11px}
+</style>
+</head>
+<body>
+<h1>小猪图片自检</h1>
+<div class="ver">版本 v3.8.0 · 这一页只干一件事：证明图片到底能不能显示</div>
+
+<div class="card">
+  <h2>1. 大图（小猪窝那只用的）</h2>
+  <img id="a" src="./img/pig.png?v=8" alt="大图">
+  <div class="meta" id="ma">检测中…</div>
+</div>
+
+<div class="card">
+  <h2>2. 中图（logo / 爱心用的）</h2>
+  <img id="b" src="./img/pig-sm.png?v=8" alt="中图" style="width:240px">
+  <div class="meta" id="mb">检测中…</div>
+</div>
+
+<div class="card">
+  <h2>3. 小图加粗版（按钮用的）</h2>
+  <img id="c" src="./img/pig-ic.png?v=8" alt="小图" style="width:120px">
+  <div class="meta" id="mc">检测中…</div>
+</div>
+
+<div class="card">
+  <h2>怎么读这个结果</h2>
+  <div class="tip">
+    三张图都看得见 → 图片本身没问题，问题在你打开的那个 App/网页的缓存里
+    （回 <a href="./#items">小猪窝</a> 下拉刷新两次）。<br>
+    有一张是空白 → 把这一页截图发给我，我按这个编号去修。<br>
+    页面最底下的数字是浏览器报告的真实尺寸，<code>640×378</code> 才是对的。
+  </div>
+</div>
+
+<div class="card">
+  <h2>本机信息</h2>
+  <div class="meta" id="env"></div>
+</div>
+
+<script>
+  var imgs = [['a', 'ma'], ['b', 'mb'], ['c', 'mc']];
+  function check() {
+    var done = 0;
+    imgs.forEach(function (pair) {
+      var im = document.getElementById(pair[0]);
+      var out = document.getElementById(pair[1]);
+      function report() {
+        var ok = im.complete && im.naturalWidth > 0;
+        out.innerHTML = (ok ? '<span class="ok">✅ 加载成功</span>' : '<span class="bad">❌ 没加载出来</span>')
+          + ' · 真实尺寸 ' + im.naturalWidth + '×' + im.naturalHeight
+          + ' · 显示 ' + Math.round(im.getBoundingClientRect().width) + '×' + Math.round(im.getBoundingClientRect().height)
+          + '<br>' + im.currentSrc;
+        done++;
+      }
+      if (im.complete) report();
+      else {
+        im.addEventListener('load', report);
+        im.addEventListener('error', function () {
+          out.innerHTML = '<span class="bad">❌ 加载失败</span><br>' + im.currentSrc;
+        });
+      }
+    });
+    setTimeout(function () {
+      imgs.forEach(function (pair) {
+        var im = document.getElementById(pair[0]);
+        var out = document.getElementById(pair[1]);
+        if (out.innerHTML.indexOf('检测中') >= 0) {
+          out.innerHTML = '<span class="bad">❌ 3 秒还没加载出来</span> · nw=' + im.naturalWidth;
+        }
+      });
+    }, 3000);
+  }
+  window.addEventListener('load', check);
+  document.getElementById('env').innerHTML =
+    'UA: ' + navigator.userAgent + '<br>'
+    + 'SW: ' + (navigator.serviceWorker ? '支持' : '不支持') + '<br>'
+    + '设备像素比: ' + (window.devicePixelRatio || 1) + '<br>'
+    + '时间: ' + new Date().toString();
+</script>
+</body>
+</html>
